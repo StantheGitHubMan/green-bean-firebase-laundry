@@ -54,7 +54,7 @@ return item.address;
 function checkUser()
 {
 //var userchk;
-ref.child('Current User').on("value", function(snapshot){userchk =snapshot.val();},function (errorObject){console.log("The read failed: "+errorObject.code);
+ref.child('Current User').once("value", function(snapshot){userchk =snapshot.val();},function (errorObject){console.log("The read failed: "+errorObject.code);
 
 //console.log("User Check Says:",userchk);//Troubleshooting
 
@@ -66,7 +66,7 @@ ref.child('Current User').on("value", function(snapshot){userchk =snapshot.val()
 	{
 	console.log("Its Jane");
 	}*/
-	ref.child('Current User').off();
+//	ref.child('Current User').off();
 });
 
 var name=[];
@@ -135,8 +135,8 @@ return(value);
 function getvalue(usname)
 {
 var custom=0;
-ref.child('Users').child('usname').on("value",function(snapshot){custom = snapshot.val();},function(err){});
-
+ref.child('Users').child(usname).on("child_changed",function(snapshot){custom = snapshot.val();},function(err){});
+//was value
 return(custom);
 }
 //BEGIN MAIN??******************************************************************
@@ -178,7 +178,7 @@ var run = 0;
           // current_machine_status will be !OVERWRITTEN! after every status change.
           content ={'Machine Status': value};
           ref.child('Available Machines').child('Dryer 1').update(content, function(err){});
-console.log("Watcher is: ",watcher);
+console.log("Watcher is: ",watcher," inc: ",inc);
 //LOGIC CODE FOR INCREMENTING**************************************************
 //*****************************************************************************
 if (value ==2&&watcher ==0) 
