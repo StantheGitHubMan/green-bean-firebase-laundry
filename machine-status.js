@@ -23,7 +23,7 @@ ref.child('Available Machines').child('Dryer 1').child('Machine Status').set(0,f
 //*******************************************************************************
 
 //Setting Current User Value***************************************************
-var user = 'Jane';
+var user = 'Bill';
 var userinfo = {User: user};
 ref.child('Current User').set(user,function(err){});
 //******************************************************************************
@@ -67,10 +67,6 @@ console.log("User Check Says:",userchk);//Troubleshooting
 	ref.child('Current User').off();
 });
 
-//Setting up Check with Children of Users
-//******************************************ADD LENGTH CHECK FOR CHILDREN TO SET ARRAY TO************************************
-
-
 var name=[];
 var uses=[];
 var userarray = [];
@@ -110,6 +106,28 @@ console.log("GTG:",GTG);
 return(1);//GTG);
 }//END OF USERCHK FUNCTION******************************************************
 
+//Compare Function For Auth************************************************
+function compare(chekd, wreked)
+{
+
+var value = 0;
+
+if(chekd == wreked)
+{
+value = 1;
+var authuser;
+ref.child('Current User').on("value", function(snapshot){authuser =snapshot.val();},function (errorObject){console.log("The read failed: "+errorObject.code)});
+         var contentchg ={'Uses': 9};
+	 ref.child('Users').child(authuser).update(contentchg,function(err){});
+}
+else
+{
+value = 0;
+}
+console.log("Get Wrcked!",value);
+return(value);
+}//END COMPARE**************************************************************
+
 //BEGIN MAIN??******************************************************************
 //Setup the Green Bean
 var greenBean = require("green-bean");
@@ -117,23 +135,9 @@ greenBean.connect("laundry",function(laundry){
 var ipcontent = {IP_Address: ip_address('wlan0')||null}; //Calls IP Address
 ref.child('Available Machines').child('Dryer 1').child('Green Bean').update(ipcontent,function(err){});
 
-
-
-var promise = new Promise(function(1,0){
-//if(
-
-
-
-checkUser();
-promise.done(if(checkUser()==1) //Checks that user is correct
-{
-console.log("Jane is correct");
-}
-else
-{
-console.log("Nope thats not quite right");
-}
-
+var result = 0;
+result = compare(checkUser(),1);
+console.log("Result:",result);
 
 
 
@@ -142,6 +146,8 @@ console.log("Nope thats not quite right");
 
 
 
+var inc =1;
+ var watcher = 0;
 
 
 //Finish Cycle and charge account * Started Below *
@@ -158,7 +164,26 @@ console.log("Nope thats not quite right");
 
           // current_machine_status will be !OVERWRITTEN! after every status change.
           content ={'Machine Status': value};
-          ref.child('Available Machines').child('Dryer 1').update(content, function(err) {});
-    });
+          ref.child('Available Machines').child('Dryer 1').update(content, function(err){});
+console.log("Watcher is: ",watcher);
+if (value ==2&&watcher ==0) 
+{
+watcher = 1;
+inc++;
+console.log("Watcher 1");
+console.log(value," ",watcher," ",result);
+}
+else if(value == 3 &&watcher ==1&&result ==1)
+{
+ 
+watcher =0;
+var authuser;
+ref.child('Current User').on("value", function(snapshot){authuser =snapshot.val();},function (errorObject){console.log("The read failed: "+errorObject.code)});
+         var contentchg ={'Uses': inc};
+	 ref.child('Users').child('Bill').update(contentchg,function(err){});
+console.log("Triggered!");
+}
+
+	 });
 });
 
